@@ -1,0 +1,42 @@
+.navDiv{
+    width: 100%;
+    height: 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    z-index: 1000;
+    color: #fff;
+}
+
+.home-page{
+    position: absolute;
+}
+
+.other-page{
+    position: relative;
+}
+
+.navDiv:last-child{
+    width: 10rem;
+    padding-right: 4rem;
+}
+.ulStyle{
+    width: 40%;
+    display: flex;
+    gap: 2rem;
+    z-index: 1000;
+    color: #fff;
+    position: absolute;
+}
+
+.ulStyle:first-child{
+    padding-left: 1rem;
+}
+
+
+.logo{
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+}

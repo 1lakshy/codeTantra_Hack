@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrueWay</title>
+
+    <!-- leaflet css  -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <!-- search box -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <!-- shortest distance -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+
+        .coordinate {
+            position: absolute;
+            bottom: 10px;
+            right: 50%;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background-color: #000000;
+            color: #fff;
+            border: 1px solid red;
+            border-radius: 0px;
+        }
+
+        #input-form {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <div id="input-form">
+        <label for="start-input">Start Location:</label>
+        <input type="text" id="start-input" placeholder="Enter start location">
+        <label for="end-input">End Location:</label>
+        <input type="text" id="end-input" placeholder="Enter end location">
+        <button onclick="calculateRoute()">Calculate Distance</button>
+    </div> -->
+    <div id="map">
+        <div class="leaflet-control coordinate"></div>
+    </div>
+</body>
+
+</html>
+
+<!-- leaflet js  -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.74.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+
+<!-- tomtom api -->
+<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.69.0/services/services-web.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+
+<!-- searching in map -->
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<!-- shortest path -->
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    // Map initialization 
+    var map = L.map('map').setView([28.3949, 84.1240], 4);
+
+    // marker car
+    const customIcon = L.icon({
+  iconUrl: '../cab.png',
+  iconSize: [40, 50],
+  iconAnchor: [10, 41],
+});
+
+    var latitude,longitude;
+    var tileLayer = L.tileLayer('https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=dvrIjlJSdizWQAUHnnGwf0FxuA67irWl', {
+attribution: 'Map data © OpenStreetMap contributors, CC-BY-SA',zIndex:1
+});
+
+
+// tileLayer.addTo(map);
+    //osm layer
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+   
+
+
+    // googleHybrid
+    var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+   
+
+    // googleTerrain map 
+   var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+
+
+    // google street 
+    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        zIndex:2
+    });
+    
+
+    //google satellite
+    googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+    /*==============================================
+                        MARKER
+    ================================================*/
+
+
+    /*==============================================
+                    LAYER CONTROL
+    ================================================*/
+    var baseMaps = {
+        'Google Street': googleStreets,
+        "OSM": osm,
+        "Google Satellite": googleSat,
+        "googleHybrid": googleHybrid,
+        'googleTerrain': googleTerrain,
+        "trafficView":tileLayer,
+       
+       
+    };
+
+    L.control.layers(baseMaps).addTo(map);
+    tileLayer.addTo(map);
+    googleStreets.addTo(map);
+
+    /*==============================================
+                    LEAFLET EVENTS
+    ================================================*/
+    map.on('mouseover', function () {
+        console.log('your mouse is over the map')
+    })
+
+    map.on('mousemove', function (e) {
+        document.getElementsByClassName('coordinate')[0].innerHTML = 'lat: ' + e.latlng.lat + 'lng: ' + e.latlng.lng;
+        console.log('lat: ' + e.latlng.lat, 'lng: ' + e.latlng.lng)
+    })
+  
+
+    // getting User location
+    if(!navigator.geolocation){
+        console.log("Sorry ,Your Device Doesn't Support Geolocation")
+    }else{
+
+// setInterval(()=>{
+    navigator.geolocation.getCurrentPosition(getPosition)
+// },5000)       
+
+
+    }
+
+    var marker,accesArea;
+    function getPosition(position){
+         latitude = position.coords.latitude;
+         longitude = position.coords.longitude;
+        var accuracy = position.coords.accuracy;
+
+if(marker){
+    map.removeLayer(marker)
+}
+
+if(accesArea){
+    map.removeLayer(accesArea)
+}
+
+         marker = L.marker([latitude,longitude])
+         accesArea = L.circle([latitude,longitude],{radius:accuracy})  
+
+        var featureGroup = L.featureGroup([marker,accesArea]).addTo(map)
+        map.fitBounds(featureGroup.getBounds())
+        console.log(latitude,longitude,accuracy)
+
+        L.Routing.control({
+  waypoints: [
+    L.latLng(latitude,longitude),
+    L.latLng(latitude+0.0234,longitude+0.0345)
+  ]
+}).addTo(map);
+
+
+
+// map.on("click",function(e){
+//     var secondMarker = L.marker([e.latlng.lat,e.latlng.lng]).addTo(map)
+//     L.Routing.control({
+//   waypoints: [
+//     L.latLng(latitude,longitude),
+//     L.latLng(e.latlng.lat,e.latlng.lng)
+//   ]
+// })
+// })
+
+// })
+       
+    }
+
+            // Define a route as a series of latitude and longitude coordinates
+            var routeCoordinates = [
+            [19.141943, 72.831482], // Infinity Mall
+[19.141657, 72.831482], // Oberoi Mall
+[19.141446, 72.831482], // Lokhandwala Market
+[19.141181, 72.831482], // Oshiwara
+[19.140715, 72.831493], // Marol
+[19.140270, 72.831538], // MIDC
+[19.139719, 72.831661], // MIDC
+[19.139243, 72.831717], // MIDC
+[19.137254, 72.831908], // MIDC
+[19.135085, 72.832016], // MIDC
+[19.134254, 72.831897], // MIDC
+[19.133534, 72.831726], // MIDC
+[19.132513, 72.831590], // MIDC
+[19.131740, 72.831439], // MIDC
+[19.131050, 72.831368], // MIDC
+[19.130634, 72.831460], // MIDC
+[19.129769, 72.831403], // MIDC
+ 
+        ];
+            var routeCoordinates1 = [
+            [19.139282, 72.837190], // Infinity Mall
+[19.138817, 72.837166], // Oberoi Mall
+[19.138000, 72.837166], // Lokhandwala Market
+[19.137319, 72.837262], // Oshiwara
+[19.136820, 72.837346], // Marol
+[19.136366, 72.837418], // MIDC
+[19.136366, 72.837418], // MIDC // MIDC
+[19.135410, 72.837546], // MIDC
+[19.134832, 72.837557], // MIDC
+[19.134173, 72.837578], // MIDC
+[19.134224, 72.836634], // MIDC
+[19.134327, 72.835060], // MIDC
+[19.134378, 72.834346], // MIDC
+[19.134421, 72.833809], // MIDC
+[19.133689, 72.833786], // MIDC
+[19.132818, 72.833678], // MIDC
+[19.131998, 72.833609], // MIDC
+ 
+        ];
+
+        // Create a Polyline using the route coordinates
+        var polyline = L.polyline(routeCoordinates, {}).addTo(map);
+        var carpolyline = L.polyline(routeCoordinates1, {}).addTo(map);
+
+        // Create a marker at the starting point
+        var carmarker1 = L.marker(routeCoordinates[0]).addTo(map).bindPopup('<h1>Name :Jhan Shah</h1> <p>Phone:7890234578</p> <a href = "http://localhost:3000/payment/201">Book Your Ride</a>')
+        var carmarker = L.marker(routeCoordinates1[0]).addTo(map).bindPopup('<h1>Name :John Dawani</h1> <p>Phone:8767456345</p> <a href = "http://localhost:3000/payment/202">Book Your Ride</a>')
+        carmarker.setIcon(customIcon)
+        carmarker1.setIcon(customIcon)
+
+        // Function to animate the marker along the route
+        function animateMarker() {
+            var currentIndex = 0;
+
+            function moveMarker() {
+                carmarker1.setLatLng(routeCoordinates[currentIndex]);
+     
+                currentIndex++;
+
+                if (currentIndex === routeCoordinates.length) {
+                    currentIndex = 0; // Start over
+                }
+            }
+
+            setInterval(moveMarker, 4000); // Adjust the interval as needed for animation speed
+        }
+        function animateMarker1() {
+            var currentIndex = 0;
+
+            function moveMarker1() {
+                carmarker.setLatLng(routeCoordinates1[currentIndex]);
+     
+                currentIndex++;
+
+                if (currentIndex === routeCoordinates.length) {
+                    currentIndex = 0; // Start over
+                }
+            }
+
+            setInterval(moveMarker1, 4000); // Adjust the interval as needed for animation speed
+        }
+
+        // Call the animateMarker function to start the animation
+        animateMarker();
+        animateMarker1();
+
+    L.control.locate().addTo(map);
+
+    // search input box
+L.Control.geocoder().addTo(map);
+
+
+
+// click to get point
+// map.on("click",function(e){
+//     console.log(e);
+//     var secondMarker = L.marker([e.lating.lat,e.lating,lng]).addTo(map);
+
+//     // shortest path
+
+// })
+
+
+// shortest path with input
+
+
+
+</script>

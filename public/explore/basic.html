@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrueWay</title>
+
+    <!-- leaflet css  -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <!-- search box -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+    <!-- shortest distance -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+
+        .coordinate {
+            position: absolute;
+            bottom: 10px;
+            right: 50%;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background-color: #000000;
+            color: #fff;
+            border: 1px solid red;
+            border-radius: 0px;
+        }
+
+        #input-form {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <div id="input-form">
+        <label for="start-input">Start Location:</label>
+        <input type="text" id="start-input" placeholder="Enter start location">
+        <label for="end-input">End Location:</label>
+        <input type="text" id="end-input" placeholder="Enter end location">
+        <button onclick="calculateRoute()">Calculate Distance</button>
+    </div> -->
+    <div id="map">
+        <div class="leaflet-control coordinate"></div>
+    </div>
+</body>
+
+</html>
+
+<!-- leaflet js  -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.74.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+
+<!-- tomtom api -->
+<script src="https://api.tomtom.com/maps-sdk-for-web/cdn/5.x/5.69.0/services/services-web.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+
+<!-- searching in map -->
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<!-- shortest path -->
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    // Map initialization 
+    var map = L.map('map').setView([28.3949, 84.1240], 4);
+
+    var latitude,longitude;
+    var tileLayer = L.tileLayer('https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=dvrIjlJSdizWQAUHnnGwf0FxuA67irWl', {
+attribution: 'Map data © OpenStreetMap contributors, CC-BY-SA',zIndex:1
+});
+
+
+// tileLayer.addTo(map);
+    //osm layer
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+   
+
+
+    // googleHybrid
+    var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+   
+
+    // googleTerrain map 
+   var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+
+
+    // google street 
+    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        zIndex:2
+    });
+    
+
+    //google satellite
+    googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+    /*==============================================
+                        MARKER
+    ================================================*/
+
+
+    /*==============================================
+                    LAYER CONTROL
+    ================================================*/
+    var baseMaps = {
+        'Google Street': googleStreets,
+        "OSM": osm,
+        "Google Satellite": googleSat,
+        "googleHybrid": googleHybrid,
+        'googleTerrain': googleTerrain,
+        "trafficView":tileLayer,
+       
+       
+    };
+
+    L.control.layers(baseMaps).addTo(map);
+    tileLayer.addTo(map);
+    googleStreets.addTo(map);
+
+    /*==============================================
+                    LEAFLET EVENTS
+    ================================================*/
+    map.on('mouseover', function () {
+        console.log('your mouse is over the map')
+    })
+
+    map.on('mousemove', function (e) {
+        document.getElementsByClassName('coordinate')[0].innerHTML = 'lat: ' + e.latlng.lat + 'lng: ' + e.latlng.lng;
+        console.log('lat: ' + e.latlng.lat, 'lng: ' + e.latlng.lng)
+    })
+  
+
+    // getting User location
+    if(!navigator.geolocation){
+        console.log("Sorry ,Your Device Doesn't Support Geolocation")
+    }else{
+
+// setInterval(()=>{
+    navigator.geolocation.getCurrentPosition(getPosition)
+// },5000)       
+
+
+    }
+
+    var marker,accesArea;
+    function getPosition(position){
+         latitude = position.coords.latitude;
+         longitude = position.coords.longitude;
+        var accuracy = position.coords.accuracy;
+
+if(marker){
+    map.removeLayer(marker)
+}
+
+if(accesArea){
+    map.removeLayer(accesArea)
+}
+
+         marker = L.marker([latitude,longitude])
+         accesArea = L.circle([latitude,longitude],{radius:accuracy})  
+
+        var featureGroup = L.featureGroup([marker,accesArea]).addTo(map)
+        map.fitBounds(featureGroup.getBounds())
+        console.log(latitude,longitude,accuracy)
+
+//         L.Routing.control({
+//   waypoints: [
+//     L.latLng(latitude,longitude),
+//     L.latLng(latitude+0.0234,longitude+0.0345)
+//   ]
+// }).addTo(map);
+
+    }
+
+    L.control.locate().addTo(map);
+
+    // search input box
+L.Control.geocoder().addTo(map);
+
+
+
+// click to get point
+// map.on("click",function(e){
+//     console.log(e);
+//     var secondMarker = L.marker([e.lating.lat,e.lating,lng]).addTo(map);
+
+//     // shortest path
+
+// })
+
+
+// shortest path with input
+
+
+
+</script>

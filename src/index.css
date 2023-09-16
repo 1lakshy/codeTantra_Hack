@@ -1,3 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900;1000&family=Pacifico&family=Roboto+Condensed:wght@400;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+
+}
+
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +23,303 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+
+.heroSection{
+  width: 100%;
+  height: 100vh;
+  /* background-image: url('../public/hero.svg'); 
+
+  background-size: cover; */
+  /* background-size: contain; */
+  /* background-repeat: no-repeat; */
+  /* background-position: center; */
+}
+
+.content{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  padding: 4rem 6rem;
+}
+
+.heading{
+  font-size: 6rem;
+  font-weight: 800;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 6rem; 
+  letter-spacing:-0.25rem;
+}
+
+.subContents{
+  display: flex;
+  width: 100%;
+  height: 30rem;
+  padding: 2rem 0;
+  
+}
+.map{
+width: 50%;
+height: 100%;
+}
+
+.data{
+  padding: 3rem;
+  width: 50%;
+}
+.subHeading{
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+p{
+  font-size:1.25rem ;
+}
+
+/* Trip Page Starts */
+.mainTrip{
+  background-color: #f9d442;
+  height: calc(100vh - 4rem);
+  width:100% ;
+  display: flex;
+  gap: 2rem;
+  flex-direction: column;
+}
+.queryWrapper{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.queryTrip{
+  min-width:40rem;
+  height:15rem;
+  /* background: #F2F2CF; */
+
+}
+
+
+.btn{
+  width: max-content;
+  background: #000;
+  color: #fff;
+  padding: .5rem;
+  border-radius: 2rem;
+}
+.placeInput>input{
+  width: 90%;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: none;
+  border: 2px solid #000;
+}
+
+.tripP{
+  font-size:0.75rem ;
+  
+}
+/* 
+input{
+  border: none;
+  width: ;
+} */
+
+.dayInput>input{
+  width: 5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: none;
+  border: 2px solid #000;
+}
+.budgetInput>input{
+  width: 10rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: none;
+  border: 2px solid #000;
+}
+
+.queryBudget{
+  width: 100%;
+}
+.responseTrip{
+  width:70% ;
+ /* background-color: #edb8b8; */
+ height: 18rem;
+}
+
+.responceWrapper{
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.resText{
+  width: 100%;
+  border-radius: 2rem;
+  padding: 1rem;
+}
+
+/* .tonTarget:hover{
+ content: "AI Generated";
+ width: 5rem;
+ height: 5rem;
+} */
+
+.pay{
+  display: flex;
+
+}
+.payImg{
+  height: 45rem;
+  width: auto;
+  border-radius: 2rem;
+}
+/* Trip Page Starts */
+.mainTrip{
+  background-color: #f9d442;
+  height: calc(100vh - 4rem);
+  width:100% ;
+  display: flex;
+  gap: 2rem;
+  flex-direction: column;
+}
+.queryWrapper{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.queryTrip{
+  min-width:40rem;
+  height:15rem;
+  /* background: #F2F2CF; */
+
+}
+
+
+.btn{
+  width: max-content;
+  background: #000;
+  color: #fff;
+  padding: .5rem;
+  border-radius: 2rem;
+}
+.placeInput>input{
+  width: 90%;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: none;
+  border: 2px solid #000;
+}
+
+.tripP{
+  font-size:0.75rem ;
+  
+}
+/* 
+input{
+  border: none;
+  width: ;
+} */
+
+.dayInput>input{
+  width: 5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: none;
+  border: 2px solid #000;
+}
+.budgetInput>input{
+  width: 10rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: none;
+  border: 2px solid #000;
+}
+
+.queryBudget{
+  width: 100%;
+}
+.responseTrip{
+  width:70% ;
+ /* background-color: #edb8b8; */
+ height: 18rem;
+}
+
+.responceWrapper{
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.resText{
+  width: 100%;
+  border-radius: 2rem;
+  padding: 1rem;
+}
+
+/* Trip Page ends */
+
+/* SignIn Page Starts */
+.mainSign{
+  display: flex;
+
+}
+
+.contentWrapper{
+  width: 100%;
+  padding: 2rem 5rem;
+}
+.contentSign{
+flex-grow:1;
+background-color: #f9d442;
+
+}
+
+.formSign{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.navSign{
+  width: 100%;
+  display: flex;
+  padding: 1rem;
+  flex-direction: row-reverse;
+  height: 4rem;
+
+}
+.imgSign{
+  height: 100vh;
+  width: auto;
+}
+
+.inputSign{
+  height: 3rem;
+  width: 20rem;
+  border-radius: 0.75rem;
+  border: 2px solid #000;
+  background:none;
+}
+.large{
+  width: 41rem;
+}
+.btnSign{
+  width:41rem;
+  height: 3rem;
+  background-color: #000;
+  color: #fff;
+  border-radius: 0.5rem; 
+}
+
+.nameSign{
+  display: flex;
+  gap: 1rem;
+}
+
+.orSign{
+  padding: 2rem 0;
 }
